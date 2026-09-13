@@ -4,8 +4,6 @@ By Yuqing Liu
 
 ## Summary
 
-*(Written so it can be adapted directly into the Summary section of the eventual JOSS-style manuscript in `paper/paper.md`.)*
-
 This project builds a small, tested Python package, `demand_propagation`, that implements the computational workflow of a dynamic model of cross-category consumer demand. The motivating question is whether a surge in one product's use (hand sanitizer, during COVID-19) creates delayed, downstream demand for a related product (hand lotion) through *usage complementarity*: intensive use of the first product depletes a household-level condition that the second product restores. The package does not aim to produce new economic findings; it takes an existing dynamic-discrete-choice model and turns its analysis steps — building state variables, estimating a choice model, simulating forward in time, and computing summary impulse-response and multiplier statistics — into modular, documented, and independently testable software components with a reproducible environment.
 
 ## 1. Research Question / Problem
@@ -45,8 +43,8 @@ The plan is staged to match the course milestones, since each milestone's focus 
 |---|---|---|
 | **Sept 13** (Milestone 1, today) | Proposal + initial repo | This proposal; renamed `demand_propagation` package skeleton; environment and Makefile in place (current state, see README). |
 | **Sept 27** (Milestone 2) | Analytical prototype | Working, tested functions for the exposure-index construction and the inventory-transition/binning step (the two closed-form pieces). |
-| **Oct 11** (Milestone 3) | Testing & validation baseline | A forward-simulation function that iterates the state transitions over a fixed horizon under an exposure-increase vs. baseline scenario, plus tests that check basic dynamical properties (e.g., the response decays once exposure is removed, and runs are deterministic/reproducible given fixed inputs). |
-| **Oct 25** (Milestone 4) | Documentation & reproducibility pass | Data-driven layer: the logistic-regression fitting step and the future-value offset step, wired into the end-to-end workflow; synthetic example inputs and a documented data schema; README/docs updated to match the finished workflow. |
+| **Oct 11** (Milestone 3) | Testing & validation baseline | A forward-simulation function that iterates the state transitions over a fixed horizon under an exposure-increase vs. baseline scenario, initially driven by fixed or hand-calibrated decision-rule parameters (not yet the fitted model), plus tests that check basic dynamical properties (e.g., the response decays once exposure is removed, and runs are deterministic/reproducible given fixed inputs). |
+| **Oct 25** (Milestone 4) | Documentation & reproducibility pass | Data-driven layer: the logistic-regression fitting step and the future-value offset step, plus wiring the simulation engine from Milestone 3 to consume the *fitted* decision rule instead of fixed parameters; synthetic example inputs and a documented data schema; README/docs updated to match the finished workflow. |
 | **Nov 8** (Milestone 5a) | Systems & automation | CI-checked lint/type/test via `make check`; sensitivity analysis (over the exposure-weighting and inventory-depreciation parameters) automated as a script rather than run by hand. |
 | **Nov 22** (Milestone 5b) | Release candidate | Frozen public API for the package, finalized docs, a fresh clone can go from `make init` to reproduced example output with no manual steps. |
 | **Dec 6** (Milestone 6) | Final submission | Completed `paper/paper.md` (JOSS-style), presentation materials. |
@@ -71,7 +69,7 @@ These are binary, checkable conditions rather than a claim about the statistical
 ## 7. Anticipated Challenges
 
 - **Restricted data.** The empirical application uses Nielsen consumer panel data that cannot be redistributed. The package will therefore ship with small synthetic example inputs that have the same shape/schema as the real data, so the workflow can be demonstrated and tested publicly.
-- **Coupling between layers.** The three layers in Section 2 are not fully independent — forward simulation needs the fitted model, and the fitted model needs the constructed states. The plan addresses this by building and testing the layers in dependency order (state construction → simulation → fitting/estimation) rather than all at once, and by keeping each layer's function signature stable so later layers can be developed against a fixed interface.
+- **Coupling between layers.** The three layers in Section 2 are not fully independent — forward simulation ultimately needs the fitted model, and the fitted model needs the constructed states. The plan addresses this with a staged build order rather than requiring all three at once: state construction first (Milestone 2), then a simulation engine built and tested against fixed/hand-calibrated decision-rule parameters (Milestone 3, so the simulation logic itself can be validated independently), then the data-driven fitting step, at which point the simulation engine is reconnected to consume the fitted decision rule instead of the fixed placeholder (Milestone 4). Keeping the simulation engine's interface to the decision rule stable across this swap is what makes the staged order work.
 - **Scope control.** The original research contains additional robustness checks (placebo categories, alternative depreciation-rate calibrations, alternative category pairs) that are valuable empirically but not necessary to demonstrate the core software workflow. These will be treated as optional stretch goals after the core pipeline in Section 4 is working and tested.
 
 ## 8. Expected Outcomes

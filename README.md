@@ -60,14 +60,24 @@ demonstrate and test the computational workflow.
 
 ## Environment and Installation
 
-```
-make init    # create/update the Conda environment from environment.yml
-make check   # run lint (ruff) and tests (pytest)
-```
+The project environment is defined in `environment.yml`. The starter test
+suite has been verified directly with `pytest -v` (17 tests passing) inside
+an activated environment. The `makefile` provides the intended convenience
+commands (`make init`, `make check`, etc.) for a reproducible workflow, but
+`make init` itself has not yet been validated end-to-end — see the note
+below — so treat it as the planned entry point rather than a confirmed one
+for now.
 
 Run `make help` for the full list of commands (`lint`, `format`, `test`,
 `type`, `docs`, `check`, `check-full`, `clean`). The repository is based on
 the CMSE 802 Scientific Software Starter Template.
+
+**Known gap:** `environment.yml` creates the environment at `./envs`, while
+`makefile`'s `init` target passes `--prefix=./.envs` (extra dot). The
+Makefile also uses Unix shell commands (`rm`, `find`) that are not
+guaranteed to work from `cmd.exe`/PowerShell without a POSIX-compatible
+shell. This will be fixed and `make init && make check` validated end-to-end
+by Milestone 2.
 
 ## Current Status
 

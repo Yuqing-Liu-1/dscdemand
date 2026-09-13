@@ -17,7 +17,7 @@ __all__ = list(_api.__all__)
 # Optional: expose package version from installed metadata.
 # When running directly from source, metadata may not exist yet.
 try:
-    __version__ = version("mypackage")
+   __version__ = version("demand_propagation")
 except PackageNotFoundError:
     __version__ = "0.0.0"
 

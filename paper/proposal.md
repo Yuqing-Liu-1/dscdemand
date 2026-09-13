@@ -1,31 +1,79 @@
 # Project Proposal
 
-By [Your Name]
+By Yuqing Liu
 
 ## Summary
 
-Provide a short summary of the project and its purpose.
+*(Written so it can be adapted directly into the Summary section of the eventual JOSS-style manuscript in `paper/paper.md`.)*
 
-## Overview
+This project builds a small, tested Python package, `demand_propagation`, that implements the computational workflow of a dynamic model of cross-category consumer demand. The motivating question is whether a surge in one product's use (hand sanitizer, during COVID-19) creates delayed, downstream demand for a related product (hand lotion) through *usage complementarity*: intensive use of the first product depletes a household-level condition that the second product restores. The package does not aim to produce new economic findings; it takes an existing dynamic-discrete-choice model and turns its analysis steps — building state variables, estimating a choice model, simulating forward in time, and computing summary impulse-response and multiplier statistics — into modular, documented, and independently testable software components with a reproducible environment.
 
-Describe the research domain or problem area in a way that is understandable to a broad audience. Explain why this work matters and how computation or software supports it.
+## 1. Research Question / Problem
 
-## Software or Project Description
+**Question:** After a household is exposed to more of an upstream product (sanitizer), how does its probability of purchasing a downstream product (lotion) evolve over the following weeks, and how much of that pattern is driven by (a) a direct demand effect versus (b) the household's own inventory dynamics (buying lotion now lowers the odds of buying it again soon)?
 
-Describe the software you will develop or improve. Explain the main functionality, the intended users, and the expected impact of the work.
+**Software problem:** The existing analysis that answers this question lives as a set of ad hoc research scripts. There is no separable, testable implementation of the core computational steps (state construction, model fitting, forward simulation, summary-statistic computation), so the workflow is hard to verify, rerun on new inputs, or hand off to a collaborator. This project's problem is a software-engineering one: convert that workflow into a package that can be installed, tested, and rerun end-to-end from documented inputs to documented outputs.
 
-## Project Goals and Timeline
+## 2. Model Components
 
-Describe the short-term, medium-term, and long-term goals for the project. Include a brief timeline for the semester and indicate what will be completed by the first milestone and by the end of the semester.
+The underlying model has three computational layers, each of which maps onto one of the modeling approaches used later in this course. Framing them this way also gives the semester timeline in Section 4 a natural structure.
 
-## Methods and Workflow
+| Layer | What it computes | Model type | Course module it matches |
+|---|---|---|---|
+| **State construction** | Closed-form transforms: a weighted-average exposure index from purchase history, and a deterministic inventory-stock recursion with a binning/discretization step | **Analytical** — fixed equations, no fitting or numerical simulation | Analytical Modeling (Milestone 2) |
+| **Forward simulation** | Iterating the fitted decision rule and the inventory recursion forward in time, under an "exposure increase" scenario and a "no increase" baseline scenario, to trace out a response over a multi-week horizon | **Physical/dynamical-system style** — a discrete-time state-update rule simulated step by step, structurally the same problem as simulating any other discrete dynamical system forward in time | Physical Modeling (Milestone 3) |
+| **Model fitting** | A logistic-regression estimate of the purchase probability as a function of the state, plus a second fitting step that folds in the estimated future-value effect | **Data-driven** — parameters are estimated from data, not assumed | Data-Driven Modeling (Milestone 4) |
 
-Describe the main workflow, tools, or methods the project will use. Mention the software engineering practices you plan to apply, such as testing, documentation, environment management, or quality checks.
+The final package output — a per-week response curve and two summary multipliers (a "net" one that allows purchases now to be offset by fewer purchases later, and a "gross" one that only counts positive carryover) — is produced by composing these three layers in sequence.
 
-## Anticipated Challenges
+## 3. Software Objective for the Semester
 
-List the main challenges you anticipate and how you might respond to them.
+Build and document a `demand_propagation` package that:
 
-## Expected Outcomes
+1. Exposes independently testable functions for each of the three layers in Section 2.
+2. Runs end-to-end on a small synthetic (non-restricted) example dataset shaped like the real data, producing the per-week response curve and multipliers from a single documented command.
+3. Has an automated test suite (`make test` / `make check`) covering normal inputs, at least one edge case, and at least one invalid-input case per public function.
+4. Has a reproducible Conda environment, a Makefile-driven workflow, and documentation sufficient for someone other than the author to run and extend it without guesswork.
 
-Describe what success would look like for this project by the end of the semester.
+This is a realistic, bounded scope: it does not require re-deriving the model or re-running the original restricted-data analysis, only re-implementing its computational steps as reusable, tested software.
+
+## 4. First-Phase Plan and Timeline
+
+The plan is staged to match the course milestones, since each milestone's focus (analytical / physical / data-driven / documentation) lines up with one layer of the model in Section 2.
+
+| Date | Milestone | Deliverable for this project |
+|---|---|---|
+| **Sept 13** (Milestone 1, today) | Proposal + initial repo | This proposal; renamed `demand_propagation` package skeleton; environment and Makefile in place (current state, see README). |
+| **Sept 27** (Milestone 2) | Analytical prototype | Working, tested functions for the exposure-index construction and the inventory-transition/binning step (the two closed-form pieces). |
+| **Oct 11** (Milestone 3) | Testing & validation baseline | A forward-simulation function that iterates the state transitions over a fixed horizon under an exposure-increase vs. baseline scenario, plus tests that check basic dynamical properties (e.g., the response decays once exposure is removed, and runs are deterministic/reproducible given fixed inputs). |
+| **Oct 25** (Milestone 4) | Documentation & reproducibility pass | Data-driven layer: the logistic-regression fitting step and the future-value offset step, wired into the end-to-end workflow; synthetic example inputs and a documented data schema; README/docs updated to match the finished workflow. |
+| **Nov 8** (Milestone 5a) | Systems & automation | CI-checked lint/type/test via `make check`; sensitivity analysis (over the exposure-weighting and inventory-depreciation parameters) automated as a script rather than run by hand. |
+| **Nov 22** (Milestone 5b) | Release candidate | Frozen public API for the package, finalized docs, a fresh clone can go from `make init` to reproduced example output with no manual steps. |
+| **Dec 6** (Milestone 6) | Final submission | Completed `paper/paper.md` (JOSS-style), presentation materials. |
+
+## 5. Testing and Validation Approach
+
+- **Unit tests (pytest, via `make test`):** each public function in `demand_propagation` gets tests for known values, at least one edge case, and at least one invalid-input case, following the pattern already established in `demand_propagation/tests/test_pytest.py`.
+- **Property/regression checks on the dynamical layer:** the forward-simulation output should satisfy simple invariants that are cheap to check automatically — e.g., the simulated response is zero when the exposure scenario equals the baseline scenario, the response is deterministic across repeated runs on the same inputs, and the inventory recursion never leaves the valid discretized range.
+- **Output-level sanity check:** on the synthetic example data, the simulated per-week response curve should qualitatively match the shape reported in the underlying research (rising, peaking within the first several weeks, then decaying) — used as a build/sanity check on the software, not as a statistical claim about the synthetic data.
+- **Code quality gates:** `ruff` (lint/format) and `mypy` (type checking) run via `make check` / `make check-full`.
+
+## 6. Success Metric
+
+The project is successful if, at the end of the semester, a fresh clone of the repository can:
+
+1. Run `make init && make check` with zero test failures and zero lint errors.
+2. Run the documented example workflow on the included synthetic input data and produce the per-week response curve and both multipliers without any manual/undocumented steps.
+3. Show at least one test per public function in the package (normal case + edge case + invalid-input case), matching the template pattern already in the test suite.
+
+These are binary, checkable conditions rather than a claim about the statistical significance of any result — consistent with the goal of this project being the software, not new empirical findings.
+
+## 7. Anticipated Challenges
+
+- **Restricted data.** The empirical application uses Nielsen consumer panel data that cannot be redistributed. The package will therefore ship with small synthetic example inputs that have the same shape/schema as the real data, so the workflow can be demonstrated and tested publicly.
+- **Coupling between layers.** The three layers in Section 2 are not fully independent — forward simulation needs the fitted model, and the fitted model needs the constructed states. The plan addresses this by building and testing the layers in dependency order (state construction → simulation → fitting/estimation) rather than all at once, and by keeping each layer's function signature stable so later layers can be developed against a fixed interface.
+- **Scope control.** The original research contains additional robustness checks (placebo categories, alternative depreciation-rate calibrations, alternative category pairs) that are valuable empirically but not necessary to demonstrate the core software workflow. These will be treated as optional stretch goals after the core pipeline in Section 4 is working and tested.
+
+## 8. Expected Outcomes
+
+A modular, documented, and tested `demand_propagation` package that reproduces the core computational pipeline (state construction → forward simulation → estimation → summary statistics) of the structural model, runnable end-to-end on shareable synthetic inputs. The repository will include: reusable Python functions organized by layer, an automated test suite, a reproducible environment, example inputs, and documentation describing how to run and extend the workflow.

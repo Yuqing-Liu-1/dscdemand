@@ -40,59 +40,77 @@ semester (see the timeline in `paper/proposal.md`, Section 4).
 
 ## Repository Structure
 
-- `paper/` — `proposal.md` (this project's proposal) and `paper.md` (JOSS-style manuscript, filled in later).
-- `demand_propagation/` — the Python package; currently the starter template functions and tests, to be replaced by the state-construction, simulation, and fitting modules described above.
-- `scripts/` — supporting scripts (e.g. `rename_package.py`, already run to rename the starter package to `demand_propagation`).
+- `paper/` — `proposal.md` (this project's proposal) and `paper.md` (JOSS-style manuscript, including per-module reflections).
+- `demand_propagation/` — the Python package:
+  - `state.py` — the two analytical state-construction functions: `exposure_index` and `inventory_transition` + `bin_inventory`.
+  - `synthetic_panel.py` — `generate_synthetic_panel`, a synthetic ("phantom") household-week data generator shaped like the real (restricted) research panel, with a known/hidden `truth` of generating parameters.
+  - `tests/` — pytest suite for both modules (known values, edge cases, invalid-input cases).
+- `scripts/` — supporting scripts:
+  - `rename_package.py` — one-time template rename helper (already run for Milestone 1).
+  - `generate_example_data.py` — regenerates `data/example/synthetic_panel.csv` from a fixed seed; this script is the single source of truth for that file.
+  - `demo_state_construction.py` — runnable example exercising both modules end to end; see Quick Example below.
+- `data/example/synthetic_panel.csv` — a small (50 households x 20 weeks) synthetic example dataset, fully reproducible from `scripts/generate_example_data.py`. Contains no real data.
 - `environment.yml` — Conda environment and dependencies.
 - `makefile` — documented workflow commands (see below).
 - `pyproject.toml` — tool configuration for pytest, ruff, and mypy.
 - `00_START_HERE.ipynb` — walkthrough notebook from the course software template.
 
-A `data/` directory (synthetic/example inputs only — no restricted data) will
-be added once the state-construction functions exist to consume it.
-
 ## Data Availability
 
-The empirical application uses restricted Nielsen consumer purchase data
-that cannot be distributed with this repository. The project will use small
-synthetic or non-confidential example inputs, shaped like the real data, to
-demonstrate and test the computational workflow.
+The empirical application uses restricted Nielsen Consumer Panel data that
+cannot be distributed with this repository. No real data file is included
+anywhere in this repository. `demand_propagation/synthetic_panel.py`
+generates synthetic data with the same column schema as the real panel
+(inspected locally to confirm column names/types only; the real file itself
+was never copied into this project) so the computational workflow can be
+demonstrated and tested publicly.
+
+## Quick Example
+
+```
+python scripts/demo_state_construction.py
+```
+
+This prints a hand-written exposure-index/inventory-trajectory example
+(matching the worked example in the underlying paper) followed by a preview
+of a freshly generated synthetic panel. No data files are required.
 
 ## Environment and Installation
 
-The project environment is defined in `environment.yml`. The starter test
-suite has been verified directly with `pytest -v` (17 tests passing) inside
-an activated environment. The `makefile` provides the intended convenience
-commands (`make init`, `make check`, etc.) for a reproducible workflow, but
-`make init` itself has not yet been validated end-to-end — see the note
-below — so treat it as the planned entry point rather than a confirmed one
-for now.
+```
+make init    # create/update the Conda environment and install the package
+make check   # run lint (ruff) and tests (pytest)
+```
+
+The underlying commands have been verified directly (`ruff check .` passes
+with zero warnings; the full test suite of 44 tests passes via `pytest -v`).
+`make init` now also runs `pip install -e .` inside the environment so
+`demand_propagation` and the scripts in `scripts/` are importable without
+manual `PYTHONPATH` configuration — this fix has been code-reviewed but not
+yet re-run through `make init` itself end-to-end on a clean machine; that
+confirmation is a good first check next time the environment is rebuilt.
 
 Run `make help` for the full list of commands (`lint`, `format`, `test`,
 `type`, `docs`, `check`, `check-full`, `clean`). The repository is based on
 the CMSE 802 Scientific Software Starter Template.
 
-**Known gap:** `environment.yml` creates the environment at `./envs`, while
-`makefile`'s `init` target passes `--prefix=./.envs` (extra dot). The
-Makefile also uses Unix shell commands (`rm`, `find`) that are not
-guaranteed to work from `cmd.exe`/PowerShell without a POSIX-compatible
-shell. This will be fixed and `make init && make check` validated end-to-end
-by Milestone 2.
-
 ## Current Status
 
-**Milestone 1 (Sept 13):** Repository scaffold, proposal, and Conda
-environment are in place. The starter package has been renamed
-`mypackage` → `demand_propagation` (via `scripts/rename_package.py`); the
-package currently still contains the template's placeholder functions and
-tests, which will be replaced starting with the next milestone.
+**Milestone 2 (Sept 27):** The two analytical state-construction functions
+(`exposure_index`, `inventory_transition` + `bin_inventory`) are implemented
+and tested, including a regression test reproducing the paper's own worked
+example at `rho = 0.84`. A synthetic panel generator (`synthetic_panel.py`)
+produces data shaped like the real research panel for testing and
+demonstration. `ruff check .` and the full `pytest` suite (44 tests) pass
+cleanly. The template's placeholder `example.py` module has been removed
+and `00_START_HERE.ipynb` updated to match.
 
 ## Next Step
 
-**By Milestone 2 (Sept 27):** implement and test the two analytical
-state-construction functions — the sanitizer-exposure index (weighted
-average over the past nine weeks) and the lotion-inventory transition
-(deterministic depreciation-plus-purchase recursion, with a discretization
-step into inventory bins). These are the first components in the planned
-workflow (Section 4 of `paper/proposal.md`) and have no dependency on model
-fitting, so they are the natural starting point.
+**By Milestone 3 (Oct 11):** implement the forward-simulation engine that
+iterates the state transitions over a multi-week horizon under an
+exposure-increase vs. baseline scenario, initially driven by fixed or
+hand-calibrated decision-rule parameters rather than a fitted model (see
+`paper/proposal.md`, Section 4). Add tests checking basic dynamical
+properties: the response is zero when the exposure scenario equals the
+baseline, and repeated runs on the same inputs are deterministic.

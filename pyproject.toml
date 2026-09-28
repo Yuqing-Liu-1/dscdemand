@@ -10,9 +10,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "demand_propagation"
 version = "0.1.0"
-description = "Starter package for research software projects"
+description = "Reusable computational workflow for a dynamic cross-category demand propagation model"
 readme = "README.md"
 requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+]
 
 [tool.setuptools.packages.find]
 include = ["demand_propagation*"]

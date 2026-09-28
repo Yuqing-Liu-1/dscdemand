@@ -10,6 +10,8 @@ channels:
 dependencies:
   - python>=3.11,<3.13  # Core runtime (required)
   - pip  # Core package installer (required)
+  - numpy  # Core: array math for state-construction functions
+  - pandas  # Core: DataFrame support for synthetic panel data
   - pytest  # Optional: unit testing tool
   - pytest-cov  # Optional: test coverage reporting
   - black  # Optional: automatic code formatting

@@ -9,10 +9,12 @@ Overview:
 
 from importlib.metadata import PackageNotFoundError, version
 
-from . import example as _api
-from .example import *  # noqa: F401,F403
+from . import state as _state_api
+from . import synthetic_panel as _synthetic_panel_api
+from .state import *  # noqa: F401,F403
+from .synthetic_panel import *  # noqa: F401,F403
 
-__all__ = list(_api.__all__)
+__all__ = list(_state_api.__all__) + list(_synthetic_panel_api.__all__)
 
 # Optional: expose package version from installed metadata.
 # When running directly from source, metadata may not exist yet.

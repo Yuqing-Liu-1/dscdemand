@@ -34,11 +34,11 @@ Use this section to draft short reflections from each in-class activity. These n
 
 ## Modeling Intro
 
-Draft a short reflection on what you learned in the modeling intro activities, which tools or techniques were most useful, how the work relates to your project, and whether you plan to adopt any of the ideas.
+The `modeling_intro` activity used a small barycentric-triangle script to practice the arc from a working script to a reusable module, and to introduce Git hygiene (`git add -u` instead of `git add .`, commit messages that explain *why*, committing before letting Ruff auto-fix anything) and a basic Ruff workflow (`check` → investigate a warning → `--fix` → `format`, always followed by `git diff` review rather than blind trust). The most useful idea was the "A + P + D = 1" triangle for classifying a project's mix of Analytical, Physical, and Data-Driven components — I used this framing directly in the project proposal's Model Components table (state construction as Analytical, forward simulation as Physical/dynamical-system, CCP/MLE fitting as Data-Driven), so it is already shaping how the semester timeline is staged. Going forward I plan to keep the `git add -u` + reviewed-diff discipline for every milestone, and to revisit the triangle classification if the package's scope shifts.
 
 ## Analytical Modeling
 
-Draft a short reflection on what you learned in the analytical modeling activities, which methods or tools were most useful, how the work relates to your project, and whether you plan to adopt any of the ideas.
+Part 1 used SymPy to define a model symbolically rather than numerically and solve it directly (e.g. doubling time for exponential growth, peak/threshold times for a multi-dose caffeine-decay model). Part 2 introduced generating synthetic ("phantom") data from a known model with `generate_dataset.py`, inspecting how the `noise_fraction` parameter changes the observations, and a short code review of the module itself. The most useful takeaway so far is the design of `generate_dataset.py` — explicit input validation that raises a clear `ValueError`, NumPy-style docstrings with `Examples`/`Notes`, and keeping the hidden `truth` separate from the noisy observations — which I plan to follow when writing `demand_propagation`'s own analytical-layer functions, since the project has the same restricted-real-data constraint and will need synthetic inputs with a known ground truth to test against.
 
 ## Physical Modeling
 

@@ -10,6 +10,7 @@ channels:
 dependencies:
   - python>=3.11,<3.13  # Core runtime (required)
   - pip  # Core package installer (required)
+  - make  # Core: provides the `make` command used by the Makefile (not preinstalled on Windows)
   - numpy  # Core: array math for state-construction functions
   - pandas  # Core: DataFrame support for synthetic panel data
   - pytest  # Optional: unit testing tool

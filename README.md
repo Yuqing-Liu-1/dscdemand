@@ -77,22 +77,32 @@ of a freshly generated synthetic panel. No data files are required.
 
 ## Environment and Installation
 
+**First-time setup** (the `make` command itself is not preinstalled on
+Windows, so the very first environment has to be created without it):
+
 ```
-make init    # create/update the Conda environment and install the package
-make check   # run lint (ruff) and tests (pytest)
+conda env create --prefix ./envs -f environment.yml
+conda activate ./envs
 ```
 
-The underlying commands have been verified directly (`ruff check .` passes
-with zero warnings; the full test suite of 44 tests passes via `pytest -v`).
-`make init` now also runs `pip install -e .` inside the environment so
-`demand_propagation` and the scripts in `scripts/` are importable without
-manual `PYTHONPATH` configuration — this fix has been code-reviewed but not
-yet re-run through `make init` itself end-to-end on a clean machine; that
-confirmation is a good first check next time the environment is rebuilt.
+**From then on**, `make` is available inside the activated environment
+(`environment.yml` includes `make` as a dependency for exactly this reason),
+so the normal workflow is:
+
+```
+make init    # re-create/update the environment and (re)install the package
+make check   # run lint (ruff) and tests (pytest)
+```
 
 Run `make help` for the full list of commands (`lint`, `format`, `test`,
 `type`, `docs`, `check`, `check-full`, `clean`). The repository is based on
 the CMSE 802 Scientific Software Starter Template.
+
+The underlying commands have been verified directly (`ruff check .` passes
+with zero warnings; the full test suite of 44 tests passes via `pytest -v`).
+`make init` also runs `pip install -e .` inside the environment so
+`demand_propagation` and the scripts in `scripts/` are importable without
+manual `PYTHONPATH` configuration.
 
 ## Current Status
 

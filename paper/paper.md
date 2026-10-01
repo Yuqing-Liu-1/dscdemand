@@ -1,10 +1,10 @@
 ---
-title: 'My Research Software Title'
+title: 'Dynamic Cross-Category Demand Propagation'
 authors:
-  - name: Your Name
+  - name: Yuqing Liu
     affiliation: '1'
 affiliations:
-  - name: Your Institution
+  - name: Department of Agricultural, Food and Resources Economics
     index: 1
 ---
 

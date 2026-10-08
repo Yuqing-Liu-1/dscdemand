@@ -120,7 +120,7 @@ Use a layered structure to minimize duplication:
 
 - Philosophy and policy: `guides/ai-policy.md` (this file, canonical)
 - Operational agent behavior: `AGENTS.md`
-- Tool-specific adapter(s): `.github/copilot-instructions.md` and future tool adapters
+- Tool-specific adapter(s): `CLAUDE.md` and any future tool adapters
 
 Tool-specific files should reference this document and add only tool mechanics.
 
@@ -137,15 +137,11 @@ When a tool-specific file is needed:
 
 Practical examples:
 
-- Keep `.github/copilot-instructions.md` because GitHub tooling expects it.
-- Add files such as `CLAUDE.md` or `GEMINI.md` only if those tools require or strongly benefit from those filenames.
+- Add files such as `CLAUDE.md` only if a tool requires or strongly benefits from that filename.
 - If no requirement exists, use the canonical policy plus `AGENTS.md` and avoid extra files.
 
 Current adapter locations in this repository:
 
-- `.github/copilot-instructions.md`
-- `.cursorrules`
 - `CLAUDE.md`
-- `GEMINI.md`
 
 Not all tools reliably discover adapter files from subfolders. Keep active files in discovery-compatible locations.

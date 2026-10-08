@@ -40,20 +40,24 @@ semester (see the timeline in `paper/proposal.md`, Section 4).
 
 ## Repository Structure
 
-- `paper/` — `proposal.md` (this project's proposal) and `paper.md` (JOSS-style manuscript, including per-module reflections).
 - `demand_propagation/` — the Python package:
   - `state.py` — the two analytical state-construction functions: `exposure_index` and `inventory_transition` + `bin_inventory`.
   - `synthetic_panel.py` — `generate_synthetic_panel`, a synthetic ("phantom") household-week data generator shaped like the real (restricted) research panel, with a known/hidden `truth` of generating parameters.
   - `tests/` — pytest suite for both modules (known values, edge cases, invalid-input cases).
-- `scripts/` — supporting scripts:
-  - `rename_package.py` — one-time template rename helper (already run for Milestone 1).
+- `examples/` — Jupyter notebooks that demonstrate the package, with Markdown explanations between the steps:
+  - `demo_state_construction.ipynb` — walks through both modules end to end; see Quick Example below.
+- `scripts/` — command-line scripts that use the package (run them from the repository root after installation):
   - `generate_example_data.py` — regenerates `data/example/synthetic_panel.csv` from a fixed seed; this script is the single source of truth for that file.
-  - `demo_state_construction.py` — runnable example exercising both modules end to end; see Quick Example below.
 - `data/example/synthetic_panel.csv` — a small (50 households x 20 weeks) synthetic example dataset, fully reproducible from `scripts/generate_example_data.py`. Contains no real data.
+- `paper/` — `proposal.md` (this project's proposal) and `paper.md` (JOSS-style manuscript).
 - `environment.yml` — Conda environment and dependencies.
-- `makefile` — documented workflow commands (see below).
-- `pyproject.toml` — tool configuration for pytest, ruff, and mypy.
-- `00_START_HERE.ipynb` — walkthrough notebook from the course software template.
+- `pyproject.toml` — package metadata (used by `pip install -e .`) and tool configuration for pytest and ruff.
+- `AGENTS.md`, `CLAUDE.md`, `guides/ai-policy.md` — guidance for AI coding assistants used on this project.
+
+## Reflections
+
+The in-class activity reflections are in `paper/paper.md`, in the section
+**Project evolution and lessons learned** (one subsection per course module).
 
 ## Data Availability
 
@@ -65,44 +69,48 @@ generates synthetic data with the same column schema as the real panel
 was never copied into this project) so the computational workflow can be
 demonstrated and tested publicly.
 
+## Installation
+
+From the repository root:
+
+```
+conda env create -f environment.yml --solver libmamba
+conda activate demand_propagation
+pip install -e .
+python -c "import demand_propagation"
+```
+
+The last command prints nothing if the installation worked.
+`pip install -e .` is the step that makes `demand_propagation` importable
+from `scripts/` and `examples/`; without it you get
+`ModuleNotFoundError: No module named 'demand_propagation'`.
+
+`--solver libmamba` selects conda's fast dependency solver (already the
+default in conda 23.10 and later). If your conda reports that option as
+unknown, update conda first with `conda update -n base conda`.
+
 ## Quick Example
 
 ```
-python scripts/demo_state_construction.py
+jupyter lab examples/demo_state_construction.ipynb
 ```
 
-This prints a hand-written exposure-index/inventory-trajectory example
-(matching the worked example in the underlying paper) followed by a preview
-of a freshly generated synthetic panel. No data files are required.
+Then choose **Kernel → Restart Kernel and Run All Cells**. The notebook
+explains each step in Markdown: the exposure index, the inventory trajectory
+(matching the worked example in the underlying paper), and a preview of a
+generated synthetic panel. Clear all outputs before committing changes to
+the notebook.
 
-## Environment and Installation
+## Development Commands
 
-**First-time setup** (the `make` command itself is not preinstalled on
-Windows, so the very first environment has to be created without it):
+Run from the repository root with the environment active:
 
-```
-conda env create --prefix ./envs -f environment.yml
-conda activate ./envs
-```
-
-**From then on**, `make` is available inside the activated environment
-(`environment.yml` includes `make` as a dependency for exactly this reason),
-so the normal workflow is:
-
-```
-make init    # re-create/update the environment and (re)install the package
-make check   # run lint (ruff) and tests (pytest)
-```
-
-Run `make help` for the full list of commands (`lint`, `format`, `test`,
-`type`, `docs`, `check`, `check-full`, `clean`). The repository is based on
-the CMSE 802 Scientific Software Starter Template.
-
-The underlying commands have been verified directly (`ruff check .` passes
-with zero warnings; the full test suite of 44 tests passes via `pytest -v`).
-`make init` also runs `pip install -e .` inside the environment so
-`demand_propagation` and the scripts in `scripts/` are importable without
-manual `PYTHONPATH` configuration.
+| Task | Command |
+|---|---|
+| Run the tests | `pytest` |
+| Lint | `ruff check .` |
+| Auto-format | `ruff format .` |
+| Regenerate the example dataset | `python scripts/generate_example_data.py` |
 
 ## Current Status
 
@@ -111,9 +119,8 @@ manual `PYTHONPATH` configuration.
 and tested, including a regression test reproducing the paper's own worked
 example at `rho = 0.84`. A synthetic panel generator (`synthetic_panel.py`)
 produces data shaped like the real research panel for testing and
-demonstration. `ruff check .` and the full `pytest` suite (44 tests) pass
-cleanly. The template's placeholder `example.py` module has been removed
-and `00_START_HERE.ipynb` updated to match.
+demonstration, and `examples/demo_state_construction.ipynb` walks through
+both. `ruff check .` and the full `pytest` suite (44 tests) pass cleanly.
 
 ## Next Step
 

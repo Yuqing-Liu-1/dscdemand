@@ -1,31 +1,12 @@
-# Overview:
-# - Purpose: Single conda environment with testing, docs, and optional quality tools.
-# - Used by: `make init` and GitHub Actions setup.
-# - Adds: One-file setup for a complete and reproducible starter toolchain.
-# - Learn more: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
-name: scientific-software-template
+# Conda environment for the demand_propagation package (see README).
+name: demand_propagation
 channels:
   - conda-forge
-  - defaults
 dependencies:
-  - python>=3.11,<3.13  # Core runtime (required)
-  - pip  # Core package installer (required)
-  - make  # Core: provides the `make` command used by the Makefile (not preinstalled on Windows)
-  - numpy  # Core: array math for state-construction functions
-  - pandas  # Core: DataFrame support for synthetic panel data
-  - pytest  # Optional: unit testing tool
-  - pytest-cov  # Optional: test coverage reporting
-  - black  # Optional: automatic code formatting
-  - ruff  # Optional: linting and style checks
-  - mypy  # Optional: static type checking
-  - pydocstyle  # Optional: docstring style checks
-  - pip-audit  # Optional: dependency vulnerability scanning
-  - nbstripout  # Optional: strip notebook outputs before commit
-  - pre-commit  # Optional: run checks automatically before commit
-  - pdoc  # Optional: build API docs from docstrings
-  - ipykernel  # Optional: Python kernel support for notebooks
-  - jupyterlab  # Optional: notebook/lab interface
-  - pip:
-      - detect-secrets  # Optional: secret scanning for commits/CI
-prefix: ./envs
-
+  - python=3.12
+  - pip  # installs this package with `pip install -e .`
+  - numpy
+  - pandas
+  - pytest  # tests
+  - ruff  # linting and formatting
+  - jupyterlab  # runs the notebooks in examples/

@@ -111,6 +111,7 @@ celerybeat.pid
 .env
 .venv
 .envs/
+envs/
 env/
 venv/
 ENV/
@@ -137,3 +138,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Ruff cache
+.ruff_cache/
+
+# Editor-specific settings (flagged in code review: don't share personal
+# editor preferences via the shared repo)
+.vscode/

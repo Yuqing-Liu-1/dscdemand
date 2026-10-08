@@ -1,10 +1,11 @@
-"""Top-level package exports for the template package.
+"""Dynamic cross-category demand propagation.
 
-Overview:
-- Purpose: Define what the package exposes as public API.
-- Used by: Python import system and downstream users.
-- Adds: Stable import paths and cleaner user-facing package surface.
-- Learn more: https://docs.python.org/3/tutorial/modules.html#packages
+Public API re-exported from the package submodules:
+
+- ``state``: analytical state construction (``exposure_index``,
+  ``inventory_transition``, ``bin_inventory``).
+- ``synthetic_panel``: synthetic household-week panel generator
+  (``generate_synthetic_panel``).
 """
 
 from importlib.metadata import PackageNotFoundError, version
@@ -16,34 +17,9 @@ from .synthetic_panel import *  # noqa: F401,F403
 
 __all__ = list(_state_api.__all__) + list(_synthetic_panel_api.__all__)
 
-# Optional: expose package version from installed metadata.
-# When running directly from source, metadata may not exist yet.
+# Package version from installed metadata (set by `pip install -e .`).
+# Falls back to "0.0.0" when the package is imported without being installed.
 try:
-   __version__ = version("demand_propagation")
+    __version__ = version("demand_propagation")
 except PackageNotFoundError:
     __version__ = "0.0.0"
-
-# ---------------------------------------------------------------------------
-# Scaffold examples for future package growth
-# ---------------------------------------------------------------------------
-# 1) Grouped imports from multiple modules:
-# Learn more: https://realpython.com/python-modules-packages/
-# from mypackage.algebra import solve_linear
-# from mypackage.stats import mean_center
-# __all__.extend(["solve_linear", "mean_center"])
-
-# 2) Re-export everything from selected submodules using a loop:
-# Learn more: https://docs.python.org/3/reference/import.html
-# from mypackage import algebra as _algebra
-# from mypackage import stats as _stats
-#
-# for _module in (_algebra, _stats):
-#     __all__.extend(getattr(_module, "__all__", []))
-
-# 3) Optional lazy imports for heavy dependencies:
-# Learn more: https://peps.python.org/pep-0562/
-# def __getattr__(name: str):
-#     if name == "slow_model":
-#         from mypackage.models import slow_model
-#         return slow_model
-#     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

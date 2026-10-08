@@ -6,7 +6,7 @@ The file is fully synthetic (see ``demand_propagation/synthetic_panel.py``) and
 contains no real household data; it is regenerated here with a fixed seed so
 its contents stay reproducible rather than hand-edited.
 
-Usage:
+Usage (from the repository root, after `pip install -e .`; see README):
     python scripts/generate_example_data.py
 """
 

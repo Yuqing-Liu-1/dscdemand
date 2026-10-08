@@ -3,7 +3,7 @@ Tests for the analytical state-construction functions in ``state.py``.
 
 Overview:
 - Purpose: Verify exposure_index, inventory_transition, and bin_inventory.
-- Used by: `pytest` via `make test` and CI.
+- Used by: `pytest` (run from the repository root; see README).
 - Adds: Confidence that the two closed-form Milestone 2 functions behave
   as specified in Eq. (7)-(11) of the underlying research paper.
 """

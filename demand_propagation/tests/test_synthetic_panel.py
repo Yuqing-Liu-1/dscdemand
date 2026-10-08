@@ -4,7 +4,7 @@ Tests for the synthetic panel data generator in ``synthetic_panel.py``.
 Overview:
 - Purpose: Verify generate_synthetic_panel produces a well-formed,
   reproducible panel with the expected schema.
-- Used by: `pytest` via `make test` and CI.
+- Used by: `pytest` (run from the repository root; see README).
 """
 
 import pytest

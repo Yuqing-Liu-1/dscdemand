@@ -30,7 +30,7 @@ For non-trivial work:
 - Treat repository tools as optional unless the contributor or course has enabled them.
 - When tests or checks are in use, add or update the smallest relevant validation for meaningful behavior changes.
 - When they are not in use, suggest one small manual check the contributor can perform.
-- Use existing `make` targets when the project uses `make`: `make test`, `make format`, `make lint`, `make type`, `make docs`, `make check-full`.
+- This project does not use `make`. Run the commands listed under "Development Commands" in `README.md` from the repository root inside the activated environment: `pytest`, `ruff check .`, `ruff format .`.
 - If validation is skipped, state what was skipped and why.
 
 ## Repo Practices
@@ -43,4 +43,4 @@ For non-trivial work:
 
 - Update `guides/ai-policy.md` for philosophy or policy changes.
 - Update `AGENTS.md` for operational workflow changes.
-- Update `.github/copilot-instructions.md` only for GitHub-specific adapter behavior.
+- Update `CLAUDE.md` only for Claude-specific adapter behavior.

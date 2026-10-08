@@ -160,7 +160,7 @@ def generate_synthetic_panel(
     )
     panel = pd.DataFrame(rows)[column_order]
 
-    truth = {
+    truth: dict[str, object] = {
         "n_households": n_households,
         "n_weeks": n_weeks,
         "seed": seed,

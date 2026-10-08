@@ -30,8 +30,8 @@ Build and document a `demand_propagation` package that:
 
 1. Exposes independently testable functions for each of the three layers in Section 2.
 2. Runs end-to-end on a small synthetic (non-restricted) example dataset shaped like the real data, producing the per-week response curve and multipliers from a single documented command.
-3. Has an automated test suite (`make test` / `make check`) covering normal inputs, at least one edge case, and at least one invalid-input case per public function.
-4. Has a reproducible Conda environment, a Makefile-driven workflow, and documentation sufficient for someone other than the author to run and extend it without guesswork.
+3. Has an automated test suite (run with `pytest`) covering normal inputs, at least one edge case, and at least one invalid-input case per public function.
+4. Has a reproducible Conda environment, a documented command-line workflow (plain `conda`, `pip`, `pytest`, and `ruff` commands listed in the README), and documentation sufficient for someone other than the author to run and extend it without guesswork.
 
 This is a realistic, bounded scope: it does not require re-deriving the model or re-running the original restricted-data analysis, only re-implementing its computational steps as reusable, tested software.
 
@@ -41,28 +41,28 @@ The plan is staged to match the course milestones, since each milestone's focus 
 
 | Date | Milestone | Deliverable for this project |
 |---|---|---|
-| **Sept 13** (Milestone 1, today) | Proposal + initial repo | This proposal; renamed `demand_propagation` package skeleton; environment and Makefile in place (current state, see README). |
+| **Sept 13** (Milestone 1, today) | Proposal + initial repo | This proposal; renamed `demand_propagation` package skeleton; environment and Makefile in place (current state, see README). *(Update, Oct 6: the Makefile was later removed in favor of plain, cross-platform commands documented in the README.)* |
 | **Sept 27** (Milestone 2) | Analytical prototype | Working, tested functions for the exposure-index construction and the inventory-transition/binning step (the two closed-form pieces). |
 | **Oct 11** (Milestone 3) | Testing & validation baseline | A forward-simulation function that iterates the state transitions over a fixed horizon under an exposure-increase vs. baseline scenario, initially driven by fixed or hand-calibrated decision-rule parameters (not yet the fitted model), plus tests that check basic dynamical properties (e.g., the response decays once exposure is removed, and runs are deterministic/reproducible given fixed inputs). |
 | **Oct 25** (Milestone 4) | Documentation & reproducibility pass | Data-driven layer: the logistic-regression fitting step and the future-value offset step, plus wiring the simulation engine from Milestone 3 to consume the *fitted* decision rule instead of fixed parameters; synthetic example inputs and a documented data schema; README/docs updated to match the finished workflow. |
-| **Nov 8** (Milestone 5a) | Systems & automation | CI-checked lint/type/test via `make check`; sensitivity analysis (over the exposure-weighting and inventory-depreciation parameters) automated as a script rather than run by hand. |
-| **Nov 22** (Milestone 5b) | Release candidate | Frozen public API for the package, finalized docs, a fresh clone can go from `make init` to reproduced example output with no manual steps. |
+| **Nov 8** (Milestone 5a) | Systems & automation | CI-checked lint/type/test (`ruff check .`, `mypy demand_propagation`, `pytest`); sensitivity analysis (over the exposure-weighting and inventory-depreciation parameters) automated as a script rather than run by hand. |
+| **Nov 22** (Milestone 5b) | Release candidate | Frozen public API for the package, finalized docs, a fresh clone can go from the README setup steps (`conda env create`, `pip install -e .`) to reproduced example output with no undocumented steps. |
 | **Dec 6** (Milestone 6) | Final submission | Completed `paper/paper.md` (JOSS-style), presentation materials. |
 
 ## 5. Testing and Validation Approach
 
-- **Unit tests (pytest, via `make test`):** each public function in `demand_propagation` gets tests for known values, at least one edge case, and at least one invalid-input case, following the pattern already established in `demand_propagation/tests/test_pytest.py`.
+- **Unit tests (`pytest`):** each public function in `demand_propagation` gets tests for known values, at least one edge case, and at least one invalid-input case, following the pattern already established in `demand_propagation/tests/test_state.py` and `demand_propagation/tests/test_synthetic_panel.py`.
 - **Property/regression checks on the dynamical layer:** the forward-simulation output should satisfy simple invariants that are cheap to check automatically — e.g., the simulated response is zero when the exposure scenario equals the baseline scenario, the response is deterministic across repeated runs on the same inputs, and the inventory recursion never leaves the valid discretized range.
 - **Output-level sanity check:** on the synthetic example data, the simulated per-week response curve should qualitatively match the shape reported in the underlying research (rising, peaking within the first several weeks, then decaying) — used as a build/sanity check on the software, not as a statistical claim about the synthetic data.
-- **Code quality gates:** `ruff` (lint/format) and `mypy` (type checking) run via `make check` / `make check-full`.
+- **Code quality gates:** `ruff` (lint/format) and `mypy` (type checking) run as `ruff check .` and `mypy demand_propagation`.
 
 ## 6. Success Metric
 
 The project is successful if, at the end of the semester, a fresh clone of the repository can:
 
-1. Run `make init && make check` with zero test failures and zero lint errors.
+1. Follow the README setup steps (`conda env create`, `pip install -e .`) and then run `ruff check .` and `pytest` with zero lint errors and zero test failures.
 2. Run the documented example workflow on the included synthetic input data and produce the per-week response curve and both multipliers without any manual/undocumented steps.
-3. Show at least one test per public function in the package (normal case + edge case + invalid-input case), matching the template pattern already in the test suite.
+3. Show at least one test per public function in the package (normal case + edge case + invalid-input case), matching the pattern already in the test suite.
 
 These are binary, checkable conditions rather than a claim about the statistical significance of any result — consistent with the goal of this project being the software, not new empirical findings.
 

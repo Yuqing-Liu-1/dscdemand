@@ -104,6 +104,54 @@ explains each step in Markdown: the exposure index, the inventory trajectory
 generated synthetic panel. Clear all outputs before committing changes to
 the notebook.
 
+## Testing
+
+From the repository root, with the environment active:
+
+```
+pytest
+```
+
+pytest runs every `test_*` function in `demand_propagation/tests/`.
+**Success** ends with `45 passed`. **Failure** reports `N failed` with the
+test name and the line that failed:
+
+- `test_imports.py` — imports numpy, pandas, and the package. If this fails,
+  the environment is not set up correctly; fix that first.
+- `test_state.py` — known values (including the paper's worked example at
+  `rho = 0.84`), edge cases, and invalid inputs for the state functions.
+- `test_synthetic_panel.py` — shape, column schema, reproducibility from a
+  fixed seed, and invalid inputs for the synthetic panel generator.
+
+Any other failure means a function no longer behaves as specified.
+
+## Assumptions, Limitations, and Edge Cases
+
+**Assumptions**
+- Weeks before the start of the panel count as "no purchase" when building
+  the 9-week exposure window.
+- In the synthetic data, sanitizer purchases are independent across weeks
+  (fixed weekly probability), and the exposure index uses a fixed
+  `eta = 0.7`.
+
+**Limitations**
+- All data is synthetic; results check the software, not economic findings.
+- Only the state-construction layer exists; forward simulation and model
+  fitting are not implemented yet (see Next Step).
+- The synthetic lotion-purchase rule has no intercept, so the baseline
+  weekly purchase probability is 50%, higher than realistic. Synthetic
+  prices are normal draws with no lower bound.
+
+**Edge cases** (covered by tests)
+- `eta = 1` gives a plain 9-week average.
+- A stock exactly on a bin boundary (0.5, 1.5, 2.5) goes to the higher bin;
+  everything from 2.5 up is `"3+"`.
+- A panel with one household and one week is generated correctly.
+- Invalid inputs raise `ValueError` instead of returning a wrong result:
+  a purchase history that is not exactly 9 values of 0/1, `eta` outside
+  (0, 1], `rho` outside (0, 1), a negative stock, or fewer than one
+  household or week.
+
 ## Development Commands
 
 Run from the repository root with the environment active:
@@ -123,7 +171,7 @@ and tested, including a regression test reproducing the paper's own worked
 example at `rho = 0.84`. A synthetic panel generator (`synthetic_panel.py`)
 produces data shaped like the real research panel for testing and
 demonstration, and `demo_state_construction.ipynb` walks through
-both. `ruff check .` and the full `pytest` suite (44 tests) pass cleanly.
+both. `ruff check .` and the full `pytest` suite (45 tests) pass cleanly.
 
 ## Next Step
 

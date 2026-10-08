@@ -9,4 +9,4 @@ dependencies:
   - pandas
   - pytest  # tests
   - ruff  # linting and formatting
-  - jupyterlab  # runs the notebooks in examples/
+  - jupyterlab  # runs demo_state_construction.ipynb

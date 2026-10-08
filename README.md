@@ -44,8 +44,7 @@ semester (see the timeline in `paper/proposal.md`, Section 4).
   - `state.py` — the two analytical state-construction functions: `exposure_index` and `inventory_transition` + `bin_inventory`.
   - `synthetic_panel.py` — `generate_synthetic_panel`, a synthetic ("phantom") household-week data generator shaped like the real (restricted) research panel, with a known/hidden `truth` of generating parameters.
   - `tests/` — pytest suite for both modules (known values, edge cases, invalid-input cases).
-- `examples/` — Jupyter notebooks that demonstrate the package, with Markdown explanations between the steps:
-  - `demo_state_construction.ipynb` — walks through both modules end to end; see Quick Example below.
+- `demo_state_construction.ipynb` — Jupyter notebook that walks through both modules end to end, with Markdown explanations between the steps; see Quick Example below.
 - `scripts/` — command-line scripts that use the package (run them from the repository root after installation):
   - `generate_example_data.py` — regenerates `data/example/synthetic_panel.csv` from a fixed seed; this script is the single source of truth for that file.
 - `data/example/synthetic_panel.csv` — a small (50 households x 20 weeks) synthetic example dataset, fully reproducible from `scripts/generate_example_data.py`. Contains no real data.
@@ -82,7 +81,7 @@ python -c "import demand_propagation"
 
 The last command prints nothing if the installation worked.
 `pip install -e .` is the step that makes `demand_propagation` importable
-from `scripts/` and `examples/`; without it you get
+from any folder (for example from `scripts/`); without it you get
 `ModuleNotFoundError: No module named 'demand_propagation'`.
 
 `--solver libmamba` selects conda's fast dependency solver (already the
@@ -92,10 +91,14 @@ unknown, update conda first with `conda update -n base conda`.
 ## Quick Example
 
 ```
-jupyter lab examples/demo_state_construction.ipynb
+jupyter lab demo_state_construction.ipynb
 ```
 
-Then choose **Kernel → Restart Kernel and Run All Cells**. The notebook
+Run this from the repository root with the `demand_propagation` environment
+active, so the notebook uses that environment (if you open the notebook from
+an already running Jupyter or from VS Code, select the `demand_propagation`
+environment as the kernel). Then choose
+**Kernel → Restart Kernel and Run All Cells**. The notebook
 explains each step in Markdown: the exposure index, the inventory trajectory
 (matching the worked example in the underlying paper), and a preview of a
 generated synthetic panel. Clear all outputs before committing changes to
@@ -119,7 +122,7 @@ Run from the repository root with the environment active:
 and tested, including a regression test reproducing the paper's own worked
 example at `rho = 0.84`. A synthetic panel generator (`synthetic_panel.py`)
 produces data shaped like the real research panel for testing and
-demonstration, and `examples/demo_state_construction.ipynb` walks through
+demonstration, and `demo_state_construction.ipynb` walks through
 both. `ruff check .` and the full `pytest` suite (44 tests) pass cleanly.
 
 ## Next Step

@@ -48,15 +48,15 @@ semester (see the timeline in `paper/proposal.md`, Section 4).
 - `scripts/` — command-line scripts that use the package (run them from the repository root after installation):
   - `generate_example_data.py` — regenerates `data/example/synthetic_panel.csv` from a fixed seed; this script is the single source of truth for that file.
 - `data/example/synthetic_panel.csv` — a small (50 households x 20 weeks) synthetic example dataset, fully reproducible from `scripts/generate_example_data.py`. Contains no real data.
-- `paper/` — `proposal.md` (this project's proposal) and `paper.md` (JOSS-style manuscript).
+- `paper/` — `proposal.md` (this project's proposal), `paper.md` (JOSS-style manuscript), and `reflection.md` (in-class activity reflections).
 - `environment.yml` — Conda environment and dependencies.
 - `pyproject.toml` — package metadata (used by `pip install -e .`) and tool configuration for pytest and ruff.
 - `AGENTS.md`, `CLAUDE.md`, `guides/ai-policy.md` — guidance for AI coding assistants used on this project.
 
 ## Reflections
 
-The in-class activity reflections are in `paper/paper.md`, in the section
-**Project evolution and lessons learned** (one subsection per course module).
+The in-class activity reflections are in
+[`paper/reflection.md`](paper/reflection.md) (one section per activity).
 
 ## Data Availability
 
@@ -103,6 +103,32 @@ explains each step in Markdown: the exposure index, the inventory trajectory
 (matching the worked example in the underlying paper), and a preview of a
 generated synthetic panel. Clear all outputs before committing changes to
 the notebook.
+
+Expected output (first two steps):
+
+```
+exposure_index(recent-only purchase, eta=0.5) -> 0.5010
+exposure_index(recent-only purchase, eta=0.9) -> 0.1632
+exposure_index(recent-only purchase, eta=1.0) -> 0.1111
+week 1: d=True  stock=1.000 bin=1
+week 2: d=False stock=0.840 bin=1
+week 3: d=False stock=0.706 bin=1
+week 4: d=True  stock=1.593 bin=2
+week 5: d=False stock=1.338 bin=1
+```
+
+## Documentation
+
+API documentation is generated from the docstrings with
+[pdoc](https://pdoc.dev/). From the repository root, with the environment
+active:
+
+```
+pdoc -d numpy -o docs demand_propagation demand_propagation.state demand_propagation.synthetic_panel
+```
+
+Then open `docs/index.html` in a browser. The `docs/` folder is generated,
+so it is not committed.
 
 ## Testing
 
@@ -161,6 +187,7 @@ Run from the repository root with the environment active:
 | Run the tests | `pytest` |
 | Lint | `ruff check .` |
 | Auto-format | `ruff format .` |
+| Build the API docs | see [Documentation](#documentation) |
 | Regenerate the example dataset | `python scripts/generate_example_data.py` |
 
 ## Current Status
@@ -173,12 +200,21 @@ produces data shaped like the real research panel for testing and
 demonstration, and `demo_state_construction.ipynb` walks through
 both. `ruff check .` and the full `pytest` suite (45 tests) pass cleanly.
 
+**Milestone 3 (Oct 11):** added an environment check (`test_imports.py`) and
+documented how to run the tests, what success and failure look like, and the
+project's assumptions, limitations, and edge cases.
+
+**Milestone 4 (Nov 1):** added generated API documentation (pdoc), the
+expected demo output, and moved the activity reflections to
+`paper/reflection.md`.
+
 ## Next Step
 
-**By Milestone 3 (Oct 11):** implement the forward-simulation engine that
-iterates the state transitions over a multi-week horizon under an
-exposure-increase vs. baseline scenario, initially driven by fixed or
-hand-calibrated decision-rule parameters rather than a fitted model (see
-`paper/proposal.md`, Section 4). Add tests checking basic dynamical
-properties: the response is zero when the exposure scenario equals the
-baseline, and repeated runs on the same inputs are deterministic.
+The forward-simulation engine, planned for Milestone 3 in
+`paper/proposal.md` (Section 4), is not implemented yet and is the next
+piece of work: iterate the state transitions over a multi-week horizon under
+an exposure-increase vs. baseline scenario, driven first by fixed
+decision-rule parameters. Its tests will check that the response is zero
+when the scenario equals the baseline and that repeated runs on the same
+inputs give identical results. Model fitting (the data-driven layer) follows
+after that.

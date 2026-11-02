@@ -9,4 +9,5 @@ dependencies:
   - pandas
   - pytest  # tests
   - ruff  # linting and formatting
+  - pdoc  # builds the API documentation into docs/
   - jupyterlab  # runs demo_state_construction.ipynb

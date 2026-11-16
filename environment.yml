@@ -5,6 +5,7 @@ channels:
 dependencies:
   - python=3.12
   - pip  # installs this package with `pip install -e .`
+  - make  # runs the Makefile commands (also on Windows)
   - numpy
   - pandas
   - pytest  # tests

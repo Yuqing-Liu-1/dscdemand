@@ -30,7 +30,7 @@ For non-trivial work:
 - Treat repository tools as optional unless the contributor or course has enabled them.
 - When tests or checks are in use, add or update the smallest relevant validation for meaningful behavior changes.
 - When they are not in use, suggest one small manual check the contributor can perform.
-- This project does not use `make`. Run the commands listed under "Development Commands" in `README.md` from the repository root inside the activated environment: `pytest`, `ruff check .`, `ruff format .`.
+- Use the `Makefile` targets from the repository root inside the activated environment (`make help` lists them): `make check`, `make test`, `make docs`.
 - If validation is skipped, state what was skipped and why.
 
 ## Repo Practices

@@ -49,6 +49,7 @@ semester (see the timeline in `paper/proposal.md`, Section 4).
   - `generate_example_data.py` — regenerates `data/example/synthetic_panel.csv` from a fixed seed; this script is the single source of truth for that file.
 - `data/example/synthetic_panel.csv` — a small (50 households x 20 weeks) synthetic example dataset, fully reproducible from `scripts/generate_example_data.py`. Contains no real data.
 - `paper/` — `proposal.md` (this project's proposal), `paper.md` (JOSS-style manuscript), and `reflection.md` (in-class activity reflections).
+- `Makefile` — project commands (`make help`; see Commands).
 - `environment.yml` — Conda environment and dependencies.
 - `pyproject.toml` — package metadata (used by `pip install -e .`) and tool configuration for pytest and ruff.
 - `AGENTS.md`, `CLAUDE.md`, `guides/ai-policy.md` — guidance for AI coding assistants used on this project.
@@ -70,31 +71,40 @@ demonstrated and tested publicly.
 
 ## Installation
 
-From the repository root:
+From the repository root (macOS/Linux):
+
+```
+make envs
+conda activate demand_propagation
+make check
+```
+
+`make envs` creates (or updates) the conda environment and installs the
+package with `pip install -e .`; `make check` should end with `45 passed`.
+
+**Windows:** `make` is not preinstalled, but the environment includes it.
+The first time, run the commands that `make envs` runs, then use `make`
+inside the activated environment:
 
 ```
 conda env create -f environment.yml --solver libmamba
 conda activate demand_propagation
 pip install -e .
-python -c "import demand_propagation"
+make check
 ```
 
-The last command prints nothing if the installation worked.
-`pip install -e .` is the step that makes `demand_propagation` importable
-from any folder (for example from `scripts/`); without it you get
-`ModuleNotFoundError: No module named 'demand_propagation'`.
-
-`--solver libmamba` selects conda's fast dependency solver (already the
-default in conda 23.10 and later). If your conda reports that option as
-unknown, update conda first with `conda update -n base conda`.
+`pip install -e .` makes `demand_propagation` importable from any folder;
+without it you get `ModuleNotFoundError: No module named 'demand_propagation'`.
+`--solver libmamba` selects conda's fast solver (the default since conda
+23.10); if your conda does not know it, run `conda update -n base conda`.
 
 ## Quick Example
 
 ```
-jupyter lab demo_state_construction.ipynb
+make serve
 ```
 
-Run this from the repository root with the `demand_propagation` environment
+This runs `jupyter lab demo_state_construction.ipynb`. Run it from the repository root with the `demand_propagation` environment
 active, so the notebook uses that environment (if you open the notebook from
 an already running Jupyter or from VS Code, select the `demand_propagation`
 environment as the kernel). Then choose
@@ -121,24 +131,13 @@ week 5: d=False stock=1.338 bin=1
 
 API documentation is generated from the docstrings with
 [pdoc](https://pdoc.dev/). From the repository root, with the environment
-active:
-
-```
-pdoc -d numpy -o docs demand_propagation demand_propagation.state demand_propagation.synthetic_panel
-```
-
-Then open `docs/index.html` in a browser. The `docs/` folder is generated,
+active, run `make docs`. Then open `docs/index.html` in a browser. The `docs/` folder is generated,
 so it is not committed.
 
 ## Testing
 
-From the repository root, with the environment active:
-
-```
-pytest
-```
-
-pytest runs every `test_*` function in `demand_propagation/tests/`.
+From the repository root, with the environment active, run `make test`
+(or `pytest`). pytest runs every `test_*` function in `demand_propagation/tests/`.
 **Success** ends with `45 passed`. **Failure** reports `N failed` with the
 test name and the line that failed:
 
@@ -178,17 +177,20 @@ Any other failure means a function no longer behaves as specified.
   (0, 1], `rho` outside (0, 1), a negative stock, or fewer than one
   household or week.
 
-## Development Commands
+## Commands
 
-Run from the repository root with the environment active:
+All project commands are in the `Makefile`; run `make help` to list them.
+Run them from the repository root with the environment active.
 
-| Task | Command |
+| Command | What it does |
 |---|---|
-| Run the tests | `pytest` |
-| Lint | `ruff check .` |
-| Auto-format | `ruff format .` |
-| Build the API docs | see [Documentation](#documentation) |
-| Regenerate the example dataset | `python scripts/generate_example_data.py` |
+| `make envs` | Create or update the environment and install the package |
+| `make check` | Lint with ruff, then run the tests |
+| `make test` | Run the tests only |
+| `make docs` | Build the API documentation into `docs/` |
+| `make serve` | Open the demo notebook in JupyterLab |
+| `ruff format .` | Auto-format the code |
+| `python scripts/generate_example_data.py` | Regenerate the example dataset |
 
 ## Current Status
 
@@ -207,6 +209,10 @@ project's assumptions, limitations, and edge cases.
 **Milestone 4 (Nov 1):** added generated API documentation (pdoc), the
 expected demo output, and moved the activity reflections to
 `paper/reflection.md`.
+
+**Milestone 5 (Nov 15):** added a short `Makefile` as the single command
+interface (`make envs`, `make check`, `make test`, `make docs`, `make serve`),
+with `make` included in the environment so it also works on Windows.
 
 ## Next Step
 

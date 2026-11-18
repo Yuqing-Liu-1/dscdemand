@@ -14,5 +14,6 @@ def test_import_libraries() -> None:
     import pandas  # noqa: F401
 
     import demand_propagation  # noqa: F401
+    import demand_propagation.simulate  # noqa: F401
     import demand_propagation.state  # noqa: F401
     import demand_propagation.synthetic_panel  # noqa: F401

@@ -30,7 +30,7 @@ Summarize the current or expected impact of the software. This can include repro
 
 # Project evolution and lessons learned
 
-Reflections from each in-class activity are kept in [`reflection.md`](reflection.md).
+Reflections from each in-class activity are kept in [`reflections.md`](reflections.md).
 
 # AI usage disclosure
 

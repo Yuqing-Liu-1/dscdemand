@@ -48,7 +48,7 @@ semester (see the timeline in `paper/proposal.md`, Section 4).
 - `scripts/` — command-line scripts that use the package (run them from the repository root after installation):
   - `generate_example_data.py` — regenerates `data/example/synthetic_panel.csv` from a fixed seed; this script is the single source of truth for that file.
 - `data/example/synthetic_panel.csv` — a small (50 households x 20 weeks) synthetic example dataset, fully reproducible from `scripts/generate_example_data.py`. Contains no real data.
-- `paper/` — `proposal.md` (this project's proposal), `paper.md` (JOSS-style manuscript), and `reflection.md` (in-class activity reflections).
+- `paper/` — `proposal.md` (this project's proposal), `paper.md` (JOSS-style manuscript), and `reflections.md` (in-class activity reflections).
 - `Makefile` — project commands (`make help`; see Commands).
 - `environment.yml` — Conda environment and dependencies.
 - `pyproject.toml` — package metadata (used by `pip install -e .`) and tool configuration for pytest and ruff.
@@ -57,7 +57,7 @@ semester (see the timeline in `paper/proposal.md`, Section 4).
 ## Reflections
 
 The in-class activity reflections are in
-[`paper/reflection.md`](paper/reflection.md) (one section per activity).
+[`paper/reflections.md`](paper/reflections.md) (one section per activity).
 
 ## Data Availability
 
@@ -208,7 +208,7 @@ project's assumptions, limitations, and edge cases.
 
 **Milestone 4 (Nov 1):** added generated API documentation (pdoc), the
 expected demo output, and moved the activity reflections to
-`paper/reflection.md`.
+`paper/reflections.md`.
 
 **Milestone 5 (Nov 15):** added a short `Makefile` as the single command
 interface (`make envs`, `make check`, `make test`, `make docs`, `make serve`),

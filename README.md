@@ -19,7 +19,7 @@ Prompt**.
 **1. Get the code**
 
 ```
-git clone https://github.com/Yuqing-Liu-1/Demand_propagation.git dscdemand
+git clone https://github.com/Yuqing-Liu-1/dscdemand.git
 cd dscdemand
 ```
 
@@ -143,6 +143,7 @@ dataset = PanelDataset(
 | `make test` | Run the tests |
 | `make docs` | Build the API documentation into `docs/` (open `docs/index.html`) |
 | `make serve` | Open the demo notebook in JupyterLab |
+| `make figures` | Rebuild the figures in `paper/figures/` used by `paper/paper.md` |
 
 ## Tests
 

@@ -9,7 +9,7 @@ DOC_MODULES = dscdemand dscdemand.data dscdemand.states dscdemand.bellman \
 	dscdemand.models.storable_complementary dscdemand.models.storable \
 	dscdemand.models.complementary
 
-.PHONY: help init envs check test docs serve
+.PHONY: help init envs check test docs serve figures
 
 help:
 	@echo make init  - same as make envs
@@ -18,6 +18,7 @@ help:
 	@echo make test  - run the tests only
 	@echo make docs  - build the API documentation into docs/
 	@echo make serve - open the demo notebook in JupyterLab
+	@echo make figures - rebuild the figures in paper/figures/ for paper.md
 
 init: envs
 
@@ -38,3 +39,6 @@ docs:
 
 serve:
 	jupyter lab demo.ipynb
+
+figures:
+	python paper/make_figures.py

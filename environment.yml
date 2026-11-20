@@ -1,13 +1,14 @@
-# Conda environment for the demand_propagation package (see README).
-name: demand_propagation
+# Conda environment for dscdemand (see README).
+name: dscdemand
 channels:
   - conda-forge
 dependencies:
   - python=3.12
-  - pip  # installs this package with `pip install -e .`
+  - pip  # installs the package with `pip install -e .`
   - make  # runs the Makefile commands (also on Windows)
   - numpy
   - pandas
+  - scipy  # optimizer for estimation
   - pytest  # tests
   - ruff  # linting and formatting
   - pdoc  # builds the API documentation into docs/

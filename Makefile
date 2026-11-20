@@ -1,8 +1,11 @@
 # Project commands. Run `make help` to list them.
 # On Windows, `make` is installed with the conda environment (see README).
 
-ENV = demand_propagation
-DOC_MODULES = demand_propagation demand_propagation.state demand_propagation.synthetic_panel demand_propagation.simulate
+ENV = dscdemand
+DOC_MODULES = dscdemand dscdemand.data dscdemand.states dscdemand.bellman \
+	dscdemand.likelihood dscdemand.em dscdemand.counterfactual dscdemand.models \
+	dscdemand.models.storable_complementary dscdemand.models.storable \
+	dscdemand.models.complementary
 
 .PHONY: help init envs check test docs serve
 

@@ -1,149 +1,145 @@
-# Dynamic Cross-Category Demand Propagation
+# dscdemand
 
-`demand_propagation` is a small, tested Python package for a dynamic model of
-cross-category consumer demand. The motivating question: does a surge in hand
-sanitizer use (as during COVID-19) cause delayed, downstream demand for hand
-lotion, because heavy use of one product creates a need that the other
-restores?
+**Dynamic Storable–Complementary demand models in Python.**
 
-The package turns the research workflow into reusable, testable steps. It runs
-entirely on synthetic data, so it checks the software, not economic findings.
-See [`paper/proposal.md`](paper/proposal.md) for the full proposal.
+`dscdemand` estimates forward-looking models of household demand from
+household-week panel data. It targets goods that consumers **store** and
+goods whose need is created by using a **complementary** product, such as hand
+lotion after heavy hand-sanitizer use. Models are fit by nested fixed point
+maximum likelihood, allow unobserved household types (EM), and produce the
+week-by-week purchase response to a shock.
 
-## What It Does
+## Models
 
-| Layer | Module | What it computes | Status |
-|---|---|---|---|
-| State construction | `state.py` | Sanitizer-exposure index; lotion-inventory stock and its bins | Done |
-| Synthetic data | `synthetic_panel.py` | Household-week panel with the real panel's columns, from known parameters | Done |
-| Forward simulation | `simulate.py` | Weekly lotion-purchase response to an extra sanitizer purchase; gross and net multipliers | Done (fixed coefficients) |
-| Model fitting | — | Estimate the decision-rule coefficients from data | Not started |
+| Model | File | Idea | Literature | Status |
+|---|---|---|---|---|
+| Storable goods | [`storable.py`](dscdemand/models/storable.py) | Stockpiling and consumption from inventory | Erdem, Imai & Keane (2003); Hendel & Nevo (2006) | Planned |
+| Complementary goods | [`complementary.py`](dscdemand/models/complementary.py) | Buying one good raises the value of another (tied goods, add-ons) | Hartmann & Nair (2010); Liu, Derdenger & Sun (2018) | Planned |
+| Storable + complementary | [`storable_complementary.py`](dscdemand/models/storable_complementary.py) | Upstream purchases build exposure that raises demand for a storable downstream good | This package | **Available** |
+
+All models share one interface (`fit`, `simulate`, `shock_response`) and the
+same engine: state construction, Bellman solver, likelihood, and EM.
 
 ## Installation
 
-Requires [conda](https://docs.conda.io/). From the repository root
-(macOS/Linux):
+From the repository root (macOS/Linux):
 
 ```
 make init
-conda activate demand_propagation
+conda activate dscdemand
 make check
 ```
 
-`make init` creates the conda environment and installs the package with
-`pip install -e .`. `make check` should end with `58 passed`.
-
-**Windows:** `make` is not preinstalled, but the environment includes it. The
-first time, run the commands that `make init` runs, then use `make`:
+**Windows:** `make` comes with the environment, so the first time run:
 
 ```
 conda env create -f environment.yml --solver libmamba
-conda activate demand_propagation
+conda activate dscdemand
 pip install -e .
 make check
 ```
 
-If conda does not recognize `--solver libmamba`, run `conda update -n base conda`
-first.
-
 ## Quick Start
 
-```
-make serve
+```python
+from dscdemand import StorableComplementaryModel, load_example, multipliers
+
+dataset = load_example()
+model = StorableComplementaryModel(eta=0.6, rho=0.8, unanticipated=("event",))
+model.fit(dataset)
+
+model.params_  # estimated utility parameters
+response = model.shock_response(weeks=26)
+multipliers(
+    response["response"]
+)  # {'gross': 0.090, 'net': 0.075, 'offset_ratio': 0.173}
 ```
 
-This opens `demo.ipynb` in JupyterLab. Choose **Kernel → Restart Kernel and
-Run All Cells**. The notebook explains each step: the exposure index, the
-inventory stock (reproducing the paper's worked example at `rho = 0.84`), a
-synthetic panel, and the forward simulation. If you open the notebook another
-way (an already running Jupyter, or VS Code), select the `demand_propagation`
-environment as the kernel.
+One extra upstream purchase raises the probability of buying for a few weeks;
+households that bought early then hold inventory and buy less, offsetting
+about 17% of the extra demand. [`demo.ipynb`](demo.ipynb) walks through the
+same steps (`make serve`).
 
-Expected result of the simulation step (500 households, 26 weeks, seed 0):
-the response is 0 in week 0, about `0.097` in week 1, fades over the next
-weeks, and turns slightly negative around weeks 5–14 as households that
-bought early hold more inventory. The multipliers are:
+To use your own data, map its columns:
 
+```python
+from dscdemand import PanelDataset
+
+dataset = PanelDataset(
+    df,
+    household="hh_id",
+    week="week",
+    upstream="sanitizer_qty",
+    purchase="bought_lotion",
+    volume="lotion_oz",
+    price="lotion_price",
+    covariates=("event",),
+)
 ```
-{'gross': 0.185315317596, 'net': 0.149830004288}
-```
+
+## Data
+
+[`data/synthetic_panel.csv`](data/synthetic_panel.csv) is randomly generated
+(300 households x 60 weeks) and contains no real data.
 
 ## Commands
 
-Run from the repository root with the environment active (`make help` lists
-them):
-
 | Command | What it does |
 |---|---|
-| `make init` / `make envs` | Create or update the environment and install the package |
+| `make init` | Create or update the environment and install the package |
 | `make check` | Lint with ruff, then run the tests |
-| `make test` | Run the tests only |
-| `make docs` | Build the API documentation into `docs/`; open `docs/index.html` |
+| `make test` | Run the tests |
+| `make docs` | Build the API documentation into `docs/` (open `docs/index.html`) |
 | `make serve` | Open the demo notebook in JupyterLab |
 
-`python scripts/generate_example_data.py` regenerates the example dataset.
+## Tests
 
-## Testing
+`make test` runs the suite in [`dscdemand/tests/`](dscdemand/tests/); success
+ends with `41 passed`. It checks the environment, data validation, stocks and
+transitions, the Bellman fixed point, recovery of known parameters from
+simulated data, a zero response to a zero shock, and that EM never lowers the
+likelihood.
 
-`make test` (or `pytest`) runs every `test_*` function in
-`demand_propagation/tests/`. Success ends with `58 passed`; a failure names the
-test and the line that failed.
+## Limitations
 
-- `test_imports.py` — numpy, pandas, and the package import. If this fails,
-  the environment is not set up; fix that first.
-- `test_state.py` — known values (including the paper's worked example),
-  bin boundaries, and invalid inputs.
-- `test_synthetic_panel.py` — shape, columns, reproducibility from a seed,
-  and invalid inputs.
-- `test_simulate.py` — zero response without a shock or without spillover
-  (`alpha = 0`), identical results for identical inputs, a positive response
-  in the week after the shock, net never above gross, and invalid inputs.
-
-## Assumptions and Limitations
-
-- **Synthetic data only.** The research uses restricted Nielsen Consumer Panel
-  data, which is not included anywhere in this repository. The generator uses
-  the same column schema.
-- **Fixed decision rule.** Purchases follow
-  `Pr(buy) = logistic(alpha * exposure - lam * inventory_bin)` with
-  `alpha = 1.5`, `lam = 0.6`. The rule has no intercept, so the baseline weekly
-  purchase probability is 50%, higher than realistic. These coefficients are
-  assumed, not estimated.
-- **Simplified dynamics.** Unlike the full research model, households do not
-  plan ahead (no Bellman equation) and are all the same type.
-- **Monte Carlo noise.** The simulation averages simulated households, so
-  late weeks show small random wiggles around zero; more households reduce
-  them.
-- **State conventions.** Weeks before the start of the data count as "no
-  purchase"; a stock on a bin boundary (0.5, 1.5, 2.5) goes to the higher bin.
-  Invalid inputs raise `ValueError`.
+- Stock retention rates (`eta`, `rho`) and the discount factor (`beta`) are
+  fixed, not estimated.
+- States are discretized. Grids built from data shift the intercept and
+  attenuate the inventory effect relative to the true model.
+- Purchase volume is drawn after the buy decision, not chosen jointly.
+- Price and covariates enter current utility only; the continuation value is
+  solved at reference values.
 
 ## Repository Structure
 
 ```
-demand_propagation/   package: state.py, synthetic_panel.py, simulate.py, tests/
-demo.ipynb            walkthrough of the whole workflow
-scripts/              generate_example_data.py
-data/example/         synthetic_panel.csv (50 households x 20 weeks, no real data)
-paper/                proposal.md, paper.md (JOSS-style manuscript), reflections.md
-Makefile              project commands
-environment.yml       conda environment
-pyproject.toml        package metadata; pytest and ruff settings
-AGENTS.md, CLAUDE.md, guides/   guidance for AI coding assistants
+dscdemand/
+  data.py            PanelDataset, load_example
+  states.py          exposure and inventory stocks, grids, transitions
+  bellman.py         value-function iteration
+  likelihood.py      NFXP log-likelihood
+  em.py              EM for unobserved types
+  counterfactual.py  shock response and multipliers
+  models/            storable, complementary, storable_complementary
+  tests/
+data/                synthetic example panel
+demo.ipynb           getting-started notebook
+paper/               JOSS manuscript, proposal, reflections
 ```
 
-## Course Milestones
+## Citation and License
 
-| Milestone | Where to find it |
-|---|---|
-| 2 – Analytical prototype | `state.py`, `synthetic_panel.py`, their tests |
-| 3 – Testing and validation | [Testing](#testing), [Assumptions and Limitations](#assumptions-and-limitations) |
-| 4 – Documentation | This README, `make docs`, `demo.ipynb` |
-| 5 – Systems and automation | `Makefile` ([Commands](#commands)) |
-| Reflections | [`paper/reflections.md`](paper/reflections.md) |
+A JOSS-style manuscript is in [`paper/paper.md`](paper/paper.md). Released
+under the [MIT License](LICENSE).
 
-## Next Steps
+## References
 
-Estimate the decision-rule coefficients (`alpha`, `lam`) from data with a
-logistic regression, check that it recovers the known values from synthetic
-data, and run the forward simulation with the fitted coefficients.
+- Erdem, T., Imai, S., & Keane, M. P. (2003). Brand and quantity choice
+  dynamics under price uncertainty. *Quantitative Marketing and Economics*.
+- Hendel, I., & Nevo, A. (2006). Measuring the implications of sales and
+  consumer inventory behavior. *Econometrica*.
+- Hartmann, W. R., & Nair, H. S. (2010). Retail competition and the dynamics
+  of demand for tied goods. *Marketing Science*.
+- Rust, J. (1987). Optimal replacement of GMC bus engines. *Econometrica*.
+- Arcidiacono, P., & Jones, J. B. (2003). Finite mixture distributions,
+  sequential likelihood and the EM algorithm. *Econometrica*.

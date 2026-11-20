@@ -1,25 +1,23 @@
-# Overview:
-# - Purpose: Central configuration for Python tooling.
-# - Used by: pip (packaging), pytest, and ruff.
-# - Adds: Consistent tool behavior on every machine.
-# - Learn more: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "demand_propagation"
+name = "dscdemand"
 version = "0.1.0"
-description = "Reusable computational workflow for a dynamic cross-category demand propagation model"
+description = "Dynamic demand models for storable and complementary goods"
 readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Yuqing Liu" }]
 requires-python = ">=3.11"
 dependencies = [
     "numpy",
     "pandas",
+    "scipy",
 ]
 
 [tool.setuptools.packages.find]
-include = ["demand_propagation*"]
+include = ["dscdemand*"]
 
 [tool.ruff]
 line-length = 88
@@ -27,8 +25,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
-ignore = []
 
 [tool.pytest.ini_options]
 addopts = "-ra"
-testpaths = ["demand_propagation/tests"]
+testpaths = ["dscdemand/tests"]

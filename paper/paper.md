@@ -102,8 +102,40 @@ categories.
 
 # Project evolution and lessons learned
 
-Reflections from each in-class activity are kept in
+Full reflections from each course module are kept in
 [`reflections.md`](reflections.md).
+
+## Modeling Intro
+
+Classifying the project by its Analytical, Physical, and Data-Driven parts
+shaped the package layout: state construction is analytical, the
+counterfactual is a forward simulation, and estimation is data driven. The
+module also set the working habits used throughout: small reviewed commits
+and Ruff checks before every change.
+
+## Analytical Modeling
+
+Recovering parameters from synthetic data with a known truth showed that two
+parameters can trade off along a valley of equally good fits. The same issue
+appears here between the intercept and the inventory effect, and the same
+remedy is used: every estimator is first tested on data simulated from known
+parameters (`test_parameter_recovery`).
+
+## Physical Modeling
+
+Viewing a system as states plus update rules maps directly onto this model:
+exposure and inventory are stocks with linear update rules. The counterfactual
+pushes the distribution of households over states forward like a compartment
+model, while `simulate` draws individual households like an agent-based model.
+Discretizing the stocks carries the usual grid-resolution trade-off.
+
+## Data-Driven Modeling
+
+The data-driven layer became a dynamic logit estimated by maximum likelihood
+rather than a predictive model chosen by AutoML, because the counterfactuals
+need interpretable spillover and inventory effects. Trust rests on parameter
+recovery, a weekly comparison of predicted and observed purchase rates, and
+fully reproducible synthetic data, since the research data are restricted.
 
 # AI usage disclosure
 

@@ -68,6 +68,26 @@ def test_shock_raises_purchases_first(fitted) -> None:
     assert summary["net"] <= summary["gross"]
 
 
+def test_predict_proba_matches_purchase_rate(fitted) -> None:
+    """At the MLE with an intercept, mean prediction equals the buy rate."""
+    pred = fitted.predict_proba()
+    assert list(pred.columns) == ["household", "week", "purchase", "p_buy"]
+    assert pred["p_buy"].between(0, 1).all()
+    assert pred["p_buy"].mean() == pytest.approx(pred["purchase"].mean(), abs=0.01)
+
+
+def test_policy_rises_with_exposure_and_falls_with_inventory(fitted) -> None:
+    """True gamma > 0 and lam < 0, so the policy is monotone on the grid."""
+    grid = fitted.policy()
+    assert grid.shape == (
+        len(fitted.state_space_.K_reps),
+        len(fitted.state_space_.xi_reps),
+    )
+    assert (grid.diff(axis=0).iloc[1:] > 0).all().all()
+    assert (grid.diff(axis=1).iloc[:, 1:] < 0).all().all()
+    pd.testing.assert_frame_equal(grid, fitted.policy(type_index=0))
+
+
 def test_multipliers_known_values() -> None:
     assert multipliers([0.2, 0.1, -0.06]) == {
         "gross": 0.3,
@@ -87,6 +107,10 @@ def test_em_likelihood_never_decreases() -> None:
     assert model.pi_.sum() == pytest.approx(1)
     assert model.responsibilities_.shape == (150, 2)
     assert np.all(np.diff(model.loglik_trace_) > -1e-6)
+    pred = model.predict_proba()
+    assert len(pred) == 150 * 40
+    assert pred["p_buy"].between(0, 1).all()
+    assert model.policy().shape == model.policy(type_index=1).shape
 
 
 @pytest.mark.parametrize(

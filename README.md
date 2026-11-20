@@ -9,6 +9,68 @@ lotion after heavy hand-sanitizer use. Models are fit by nested fixed point
 maximum likelihood, allow unobserved household types (EM), and produce the
 week-by-week purchase response to a shock.
 
+## Getting Started
+
+The full workflow from a fresh clone takes about 10 minutes. You need
+[git](https://git-scm.com/) and [conda](https://docs.conda.io/en/latest/miniconda.html)
+(Miniconda or Anaconda). On Windows, run the commands in the **Anaconda
+Prompt**.
+
+**1. Get the code**
+
+```
+git clone https://github.com/Yuqing-Liu-1/Demand_propagation.git dscdemand
+cd dscdemand
+```
+
+**2. Install** the environment, the package, and the Jupyter kernel.
+
+macOS/Linux:
+
+```
+make init
+conda activate dscdemand
+```
+
+Windows (`make` is installed with the environment, so the first time run):
+
+```
+conda env create -f environment.yml --solver libmamba
+conda activate dscdemand
+pip install -e .
+python -m ipykernel install --user --name dscdemand --display-name "Python (dscdemand)" --env OPENBLAS_NUM_THREADS 1
+```
+
+**3. Check** that everything works:
+
+```
+make check
+```
+
+Expected: `All checks passed!` from ruff, then the tests end with
+`43 passed`.
+
+**4. Run the demo.** Open [`demo.ipynb`](demo.ipynb) (`make serve` opens it in
+JupyterLab, or open it in VS Code), select the kernel **Python (dscdemand)**,
+and run all cells (about a minute). Your results should match the outputs
+saved in the notebook. If the first cell fails with
+`ModuleNotFoundError: dscdemand`, the wrong kernel is selected.
+
+**5. Read the API documentation:** `make docs`, then open `docs/index.html`.
+
+**6. Read the paper:** [`paper/paper.md`](paper/paper.md) is the JOSS-style
+manuscript; [`paper/reflections.md`](paper/reflections.md) holds the
+reflections from each course module.
+
+| Notebook | What it shows |
+|---|---|
+| [`demo.ipynb`](demo.ipynb) | A complete analysis in eight steps: data, model, estimation, model fit, purchase policy, stockpiling vs. heterogeneity (EM), and the week-by-week response to an upstream shock |
+
+The demo answers three questions: does buying the upstream good raise
+demand for the downstream good (spillover)? Does holding inventory lower it,
+and does that survive once households are allowed to differ? And how does
+one extra upstream purchase play out over the following weeks?
+
 ## Models
 
 | Model | File | Idea | Literature | Status |
@@ -20,25 +82,6 @@ week-by-week purchase response to a shock.
 All models share one interface (`fit`, `simulate`, `shock_response`) and the
 same engine: state construction, Bellman solver, likelihood, and EM.
 
-## Installation
-
-From the repository root (macOS/Linux):
-
-```
-make init
-conda activate dscdemand
-make check
-```
-
-**Windows:** `make` comes with the environment, so the first time run:
-
-```
-conda env create -f environment.yml --solver libmamba
-conda activate dscdemand
-pip install -e .
-make check
-```
-
 ## Quick Start
 
 ```python
@@ -48,17 +91,22 @@ dataset = load_example()
 model = StorableComplementaryModel(eta=0.6, rho=0.8, unanticipated=("event",))
 model.fit(dataset)
 
-model.params_  # estimated utility parameters
-response = model.shock_response(weeks=26)
+model.params_  # utility parameters: spillover (gamma), stockpiling (lam), ...
+model.predict_proba()  # predicted purchase probability for every household-week
+model.policy()  # probability of buying at each exposure x inventory state
+response = model.shock_response(shock=2.0, weeks=26)
 multipliers(
     response["response"]
 )  # {'gross': 0.090, 'net': 0.075, 'offset_ratio': 0.173}
 ```
 
-One extra upstream purchase raises the probability of buying for a few weeks;
-households that bought early then hold inventory and buy less, offsetting
-about 17% of the extra demand. [`demo.ipynb`](demo.ipynb) walks through the
-same steps (`make serve`).
+On the example data, recent upstream purchases raise the probability of
+buying (`gamma1 > 0`) and inventory lowers it (`lam < 0`). One extra
+upstream purchase raises demand for a few weeks; households that bought
+early then hold inventory and buy less, offsetting about 17% of the extra
+demand. `StorableComplementaryModel(..., n_types=2)` adds unobserved
+household types estimated by EM. [`demo.ipynb`](demo.ipynb) walks through the
+same steps with explanations.
 
 To use your own data, map its columns:
 
@@ -86,7 +134,9 @@ dataset = PanelDataset(
 
 | Command | What it does |
 |---|---|
-| `make init` | Create or update the environment and install the package |
+| `make help` | List the commands |
+| `make init` | Same as `make envs` |
+| `make envs` | Create or update the environment, install the package, and register the **Python (dscdemand)** kernel |
 | `make check` | Lint with ruff, then run the tests |
 | `make test` | Run the tests |
 | `make docs` | Build the API documentation into `docs/` (open `docs/index.html`) |
@@ -95,7 +145,7 @@ dataset = PanelDataset(
 ## Tests
 
 `make test` runs the suite in [`dscdemand/tests/`](dscdemand/tests/); success
-ends with `41 passed`. It checks the environment, data validation, stocks and
+ends with `43 passed`. It checks the environment, data validation, stocks and
 transitions, the Bellman fixed point, recovery of known parameters from
 simulated data, a zero response to a zero shock, and that EM never lowers the
 likelihood.
@@ -125,6 +175,9 @@ dscdemand/
 data/                synthetic example panel
 demo.ipynb           getting-started notebook
 paper/               JOSS manuscript, proposal, reflections
+environment.yml      conda environment
+Makefile             project commands (make help)
+pyproject.toml       package metadata, ruff and pytest settings
 ```
 
 ## Citation and License

@@ -7,9 +7,16 @@ dependencies:
   - pip  # installs the package with `pip install -e .`
   - make  # runs the Makefile commands (also on Windows)
   - numpy
+  - libblas=*=*openblas  # OpenBLAS, not MKL: MKL crashes Jupyter kernels on Windows when the env is not activated
   - pandas
   - scipy  # optimizer for estimation
   - pytest  # tests
   - ruff  # linting and formatting
   - pdoc  # builds the API documentation into docs/
   - jupyterlab  # runs demo.ipynb
+  - matplotlib  # figures in demo.ipynb
+  - ipykernel  # registers the "Python (dscdemand)" kernel for the notebook
+variables:
+  # The model's matrices are small, so extra BLAS threads only cost memory;
+  # with many cores OpenBLAS can fail at import on low-memory machines.
+  OPENBLAS_NUM_THREADS: "1"

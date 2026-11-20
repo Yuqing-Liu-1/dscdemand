@@ -34,6 +34,7 @@ from ..likelihood import (
     flow_utility,
     neg_log_likelihood,
     purchase_probability_grid,
+    row_log_probs,
 )
 from ..states import (
     ZERO_THRESHOLD,
@@ -272,6 +273,7 @@ class StorableComplementaryModel(DynamicDemandModel):
         self.state_space_ = state_space
         self.p_ref_, self.x_ref_ = p_ref, x_ref
         self.data_ = data
+        self.arrays_ = arrays
         self.params_ = pd.DataFrame(
             {f"type_{k}": layout.theta(vector, k) for k in range(layout.n_types)}
         )
@@ -282,6 +284,80 @@ class StorableComplementaryModel(DynamicDemandModel):
             raise RuntimeError("Call fit() before using the fitted model.")
 
     # ------------------------------------------------------------ results
+
+    def predict_proba(self) -> pd.DataFrame:
+        """
+        Predicted probability of buying in every week of the fitted panel.
+
+        With several types, each row averages the type-specific
+        probabilities with its household's posterior type probabilities.
+        Compare ``p_buy`` with ``purchase`` (for example, averaged by week)
+        to check how well the model fits.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Columns ``household``, ``week``, ``purchase``, and ``p_buy``.
+        """
+        self._check_fitted()
+        arrays, layout = self.arrays_, self.layout_
+        if self.responsibilities_ is None:
+            weights = np.ones((len(self.data_), 1))
+        else:
+            weights = self.responsibilities_[arrays["household_code"]]
+        p_buy = np.zeros(len(self.data_))
+        for k in range(layout.n_types):
+            logp1, _ = row_log_probs(
+                layout.theta(self.vector_, k),
+                self.state_space_,
+                arrays,
+                self.beta,
+                layout.covariates,
+            )
+            p_buy += weights[:, k] * np.exp(logp1)
+        out = self.data_[["household", "week", "purchase"]].reset_index(drop=True)
+        return out.assign(p_buy=p_buy)
+
+    def policy(self, type_index: int | None = None) -> pd.DataFrame:
+        """
+        Probability of buying at each exposure and inventory state.
+
+        Evaluated at the mean price, with anticipated covariates at their
+        means and unanticipated ones at 0.
+
+        Parameters
+        ----------
+        type_index
+            Household type to evaluate. By default, types are averaged
+            with their estimated shares.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Rows are exposure levels ``K``, columns are inventory levels
+            ``xi`` (the grid representative values).
+        """
+        self._check_fitted()
+        types = range(self.layout_.n_types) if type_index is None else [type_index]
+        weights = self.pi_ if type_index is None else np.ones(1)
+        grid = sum(
+            w
+            * purchase_probability_grid(
+                self.layout_.theta(self.vector_, k),
+                self.state_space_,
+                self.beta,
+                self.p_ref_,
+                self.x_ref_,
+                self.layout_.covariates,
+            )
+            for k, w in zip(types, weights, strict=True)
+        )
+        space = self.state_space_
+        return pd.DataFrame(
+            grid,
+            index=pd.Index(np.round(space.K_reps, 2), name="K"),
+            columns=pd.Index(np.round(space.xi_reps, 2), name="xi"),
+        )
 
     def shock_response(
         self, shock: float | None = None, weeks: int = 26

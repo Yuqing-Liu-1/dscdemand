@@ -4,6 +4,9 @@
 ENV = dscdemand
 # One BLAS thread: the matrices are small, and many threads can exhaust memory.
 export OPENBLAS_NUM_THREADS = 1
+# Run tools inside the environment: directly if it is already active,
+# otherwise through `conda run`, so the commands work without `conda activate`.
+RUN = $(if $(filter $(ENV),$(CONDA_DEFAULT_ENV)),,conda run --no-capture-output -n $(ENV))
 DOC_MODULES = dscdemand dscdemand.data dscdemand.states dscdemand.bellman \
 	dscdemand.likelihood dscdemand.em dscdemand.counterfactual dscdemand.models \
 	dscdemand.models.storable_complementary dscdemand.models.storable \
@@ -28,17 +31,17 @@ envs:
 	conda run -n $(ENV) python -m ipykernel install --user --name $(ENV) --display-name "Python (dscdemand)" --env OPENBLAS_NUM_THREADS 1
 
 check:
-	ruff check .
-	pytest
+	$(RUN) ruff check .
+	$(RUN) pytest
 
 test:
-	pytest
+	$(RUN) pytest
 
 docs:
-	pdoc -d numpy -o docs $(DOC_MODULES)
+	$(RUN) pdoc -d numpy -o docs $(DOC_MODULES)
 
 serve:
-	jupyter lab demo.ipynb
+	$(RUN) jupyter lab demo.ipynb
 
 figures:
-	python paper/make_figures.py
+	$(RUN) python paper/make_figures.py

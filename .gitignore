@@ -16,6 +16,7 @@ docs/
 # Local environments and editor settings
 envs/
 .venv/
+venv/
 .env
 .vscode/
 .DS_Store

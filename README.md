@@ -29,8 +29,12 @@ macOS/Linux:
 
 ```
 make init
-conda activate dscdemand
 ```
+
+The `make` commands below work without activating the environment. To use
+the environment in your own shell, run `conda activate dscdemand`; if conda
+asks you to run `conda init` first, run `conda init` once and open a new
+terminal.
 
 Windows (`make` is installed with the environment, so the first time run):
 
@@ -50,10 +54,18 @@ make check
 Expected: `All checks passed!` from ruff, then the tests end with
 `43 passed`.
 
-**4. Run the demo.** Open [`demo.ipynb`](demo.ipynb) (`make serve` opens it in
-JupyterLab, or open it in VS Code), select the kernel **Python (dscdemand)**,
-and run all cells (about a minute). Your results should match the outputs
-saved in the notebook. If the first cell fails with
+**4. Run the demo.** Open [`demo.ipynb`](demo.ipynb) and select the kernel
+**Python (dscdemand)**:
+
+- VS Code: click *Select Kernel* (top right), then *Jupyter Kernel...* and
+  **Python (dscdemand)**. Alternatively, choose *Python Environments...* and
+  the `dscdemand` conda environment. Do not pick another environment, such as
+  a `venv` that VS Code created.
+- JupyterLab: run `make serve`, then *Kernel > Change Kernel* and
+  **Python (dscdemand)**.
+
+Run all cells (about a minute). Your results should match the outputs saved
+in the notebook. If the first cell fails with
 `ModuleNotFoundError: dscdemand`, the wrong kernel is selected.
 
 **5. Read the API documentation:** `make docs`, then open `docs/index.html`.

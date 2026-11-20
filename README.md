@@ -60,7 +60,9 @@ saved in the notebook. If the first cell fails with
 
 **6. Read the paper:** [`paper/paper.md`](paper/paper.md) is the JOSS-style
 manuscript; [`paper/reflections.md`](paper/reflections.md) holds the
-reflections from each course module.
+reflections from each course module. A JOSS-formatted PDF is built by GitHub
+Actions on every push that changes `paper/`: open the latest **Draft PDF** run
+in the repository's *Actions* tab and download the `paper` artifact.
 
 | Notebook | What it shows |
 |---|---|

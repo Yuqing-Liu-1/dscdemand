@@ -12,6 +12,7 @@ authors:
 affiliations:
   - name: Department of Agricultural, Food, and Resource Economics, Michigan State University
     index: 1
+date: 20 November 2026
 bibliography: paper.bib
 ---
 
